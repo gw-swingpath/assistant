@@ -10,7 +10,11 @@
     "build": "tsc -b && vite build && npm --prefix server run build",
     "lint": "eslint .",
     "format": "prettier -w \"{src,server}/**/*.{ts,tsx,js,json,md}\"",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down -v",
+    "db:push": "npm --prefix server run db:push",
+    "db:diff": "npm --prefix server run db:diff"
   },
   "dependencies": {
     "react": "^19.1.1",

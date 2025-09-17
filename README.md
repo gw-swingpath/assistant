@@ -1,6 +1,51 @@
 # React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Email Triage Web App
+====================
+
+Personal + multi-tenant email assistant. Fast React client (Vite) and Fastify TypeScript server.
+
+Quick start
+-----------
+
+```bash
+npm install
+npm --prefix server install
+npm run dev
+```
+
+URLs
+----
+
+- Client: http://localhost:5173
+- Server: http://localhost:4000
+
+Server endpoints
+----------------
+
+- `GET /healthz` → `{ status: "ok" }`
+- `GET /version` → `{ name, version, gitSha, builtAt }`
+
+Node version
+------------
+
+- Node 20 is required. Use nvm: `nvm use`.
+
+Formatting & linting
+--------------------
+
+- Lint: `npm run lint`
+- Format: `npm run format`
+
+Environment
+-----------
+
+- Server env file: create `server/.env` from `server/.env.example`
+
+CI
+--
+
+GitHub Actions runs lint and builds client + server on pushes/PRs to `main`.
 
 Currently, two official plugins are available:
 

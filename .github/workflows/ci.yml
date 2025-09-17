@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd="pg_isready -U postgres" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install root deps
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Build client
+        run: npm run build --workdir .
+      - name: Install server deps
+        run: npm --prefix server ci
+      - name: Build server
+        run: npm --prefix server run build
+      - name: Prepare database
+        env:
+          PGPASSWORD: postgres
+        run: |
+          until pg_isready -h localhost -U postgres; do sleep 1; done
+          psql -h localhost -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'assistant'" | grep -q 1 || psql -h localhost -U postgres -c 'CREATE DATABASE assistant;'
+      - name: Apply migrations
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/assistant
+        run: npm --prefix server run db:push
+      - name: Check schema drift
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/assistant
+        run: |
+          npm --prefix server run db:diff || true
+          # Fail if diff produced any changes in migrations directory
+          if ! git diff --quiet -- server/db/migrations || [ -n "$(git ls-files -o --exclude-standard -- server/db/migrations)" ]; then
+            echo "Schema drift detected. Commit generated migrations." >&2
+            exit 1
+          fi
+

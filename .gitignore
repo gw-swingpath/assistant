@@ -9,8 +9,10 @@ node_modules/
 # Env
 .env
 .env.*
-/server/.env
-/server/.env.*
+server/.env
+server/.env.*
+!server/.env.sample
+!server/.env.local.example
 
 # Logs
 npm-debug.log*
